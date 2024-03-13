@@ -27,7 +27,7 @@ exports.transcribe=(req,res)=>{
         .then(response=>{
             return res.json({status:"success",data:response.data})
         }).catch(e=>{
-            return res,json({status:"error",error:e})
+            return res.json({status:"error",error:e})
         })
         
     });
