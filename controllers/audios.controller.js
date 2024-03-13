@@ -1,6 +1,7 @@
 const fs=require('fs')
 const path=require('path');
 const axios=require('axios')
+const FormData=require('form-data')
 function createDirectoryIfNotExists(path) {
     if (!fs.existsSync(path)) {
       fs.mkdirSync(path);
@@ -16,12 +17,13 @@ exports.transcribe=(req,res)=>{
     console.log(audioFile);
     createDirectoryIfNotExists(path.resolve(__dirname,"../temp"));
     audioFile.mv(path.resolve(__dirname,"../temp",audioFile.name),()=>{
-        axios.post('https://api.openai.com/v1/audio/transcriptions',{
-            file:fs.createReadStream(path.resolve(__dirname,"../temp",audioFile.name)),
-            model:"whisper-1"
-        },{
+        const myForm=new FormData();
+        myForm.append('file',fs.createReadStream(path.resolve(__dirname,"../temp",audioFile.name)),{filename:audioFile.name});
+        myForm.append('model',"whisper-1");
+        axios.post('https://api.openai.com/v1/audio/transcriptions',myForm,{
            headers:{
-            "Authorization":`Bearer ${process.env.OPENAI_API_KEY}`
+            "Authorization":`Bearer ${process.env.OPENAI_API_KEY}`,
+            ...myForm.getHeaders()
            } 
         })
         .then(response=>{
