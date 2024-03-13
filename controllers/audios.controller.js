@@ -17,7 +17,7 @@ exports.transcribe=(req,res)=>{
     createDirectoryIfNotExists(path.resolve(__dirname,"../temp"));
     audioFile.mv(path.resolve(__dirname,"../temp",audioFile.md5),()=>{
         axios.post('https://api.openai.com/v1/audio/transcriptions',{
-            file:fs.createReadStream(path.resolve(__dirname,"../temp",uploading.md5)),
+            file:fs.createReadStream(path.resolve(__dirname,"../temp",audioFile.md5)),
             model:"whisper-1"
         },{
            headers:{
