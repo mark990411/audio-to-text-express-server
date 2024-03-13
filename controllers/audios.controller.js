@@ -15,5 +15,21 @@ exports.transcribe=(req,res)=>{
     const audioFile=req.files.file;
     console.log(audioFile);
     createDirectoryIfNotExists(path.resolve(__dirname,"../temp"));
-    return res.json({status:"success"})
+    audioFile.mv(path.resolve(__dirname,"../temp",uploading.md5),()=>{
+        axios.post('https://api.openai.com/v1/audio/transcriptions',{
+            file:fs.createReadStream(path.resolve(__dirname,"../temp",uploading.md5)),
+            model:"whisper-1"
+        },{
+           headers:{
+            "Authorization":`Bearer ${process.env.OPENAI_API_KEY}`
+           } 
+        })
+        .then(response=>{
+            return res.json({status:"success",data:response.data})
+        }).catch(e=>{
+            return res,json({status:"error",error:e})
+        })
+        
+    });
+    
 }
