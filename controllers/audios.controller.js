@@ -1,6 +1,7 @@
 const fs=require('fs')
 const path=require('path');
 const axios=require('axios')
+const {Readable}=require('stream')
 const FormData=require('form-data')
 function createDirectoryIfNotExists(path) {
     if (!fs.existsSync(path)) {
@@ -16,9 +17,10 @@ exports.transcribe=(req,res)=>{
     const audioFile=req.files.file;
     console.log(audioFile);
     createDirectoryIfNotExists(path.resolve(__dirname,"../temp"));
-    audioFile.mv(path.resolve(__dirname,"../temp",audioFile.name),()=>{
+    audioFile.mv(path.resolve(__dirname,"../temp",audioFile.name),async ()=>{
+        const stream=await Readable.from(audioFile.data)
         const myForm=new FormData();
-        myForm.append('file',fs.createReadStream(path.resolve(__dirname,"../temp",audioFile.name)),{filename:audioFile.name});
+        myForm.append('file',stream,{filename:audioFile.name});
         myForm.append('model',"whisper-1");
         axios.post('https://api.openai.com/v1/audio/transcriptions',myForm,{
            headers:{
